@@ -84,32 +84,6 @@
             margin-top: 10px;
             font-size: 0.9em;
         }
-        .google-btn {
-            width: 100%;
-            padding: 0;
-            background-color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .or-divider {
-            text-align: center;
-            margin: 20px 0;
-            color: #777;
-            position: relative;
-        }
-        .or-divider::before, .or-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background-color: #ddd;
-        }
-        .or-divider::before { left: 0; }
-        .or-divider::after { right: 0; }
     </style>
 </head>
 <body>
@@ -129,10 +103,6 @@
         <div class="create-account">
             Don't have an account? <a href="#">Create new</a>
         </div>
-        <div class="or-divider">Or Login with</div>
-        <button class="google-btn">
-            <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Sign in with Google" width="191" height="46">
-        </button>
     </div>
     <script>
         document.querySelector('.password-toggle').addEventListener('click', function() {
