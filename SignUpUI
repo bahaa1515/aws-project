@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            background-color: #007bff;
+            border-radius: 50%;
+            z-index: -1;
+        }
+        body::before {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -150px;
+        }
+        body::after {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            right: -100px;
+        }
+        .signup-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .password-container {
+            position: relative;
+        }
+        .signup-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .password-message {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .match {
+            color: green;
+        }
+        .mismatch {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h1>Sign Up</h1>
+        <form>
+            <input type="text" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <div class="password-container">
+                <input type="password" id="password" class="password-input" placeholder="Password" required>
+            </div>
+            <div class="password-container">
+                <input type="password" id="confirmPassword" class="password-input" placeholder="Confirm Password" required>
+            </div>
+            <div class="password-message" id="passwordMessage"></div>
+            <input type="date" placeholder="Date of Birth" required>
+            <button type="submit" class="signup-btn">Sign Up</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordMessage = document.getElementById('passwordMessage');
+
+            function checkPasswordMatch() {
+                if (confirmPasswordInput.value === "") {
+                    passwordMessage.textContent = "";
+                    return;
+                }
+                
+                if (passwordInput.value === confirmPasswordInput.value) {
+                    passwordMessage.textContent = "Passwords match.";
+                    passwordMessage.classList.remove('mismatch');
+                    passwordMessage.classList.add('match');
+                } else {
+                    passwordMessage.textContent = "Passwords do not match.";
+                    passwordMessage.classList.remove('match');
+                    passwordMessage.classList.add('mismatch');
+                }
+            }
+
+            passwordInput.addEventListener('input', checkPasswordMatch);
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    alert('Passwords do not match.');
+                    event.preventDefault(); // Prevent form submission
+                }
+
+                const emailInput = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value)) {
+                    alert('Please enter a valid email address.');
+                    event.preventDefault(); // Prevent form submission
+                }
+            });
+        });
+    </script>
+</body>
+</html>
