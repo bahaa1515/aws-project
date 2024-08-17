@@ -115,7 +115,7 @@
 <body>
     <div class="interests-container" id="interests-container">
         <h2>Interests</h2>
-        <p>Please pick your interests to be able to get suggestions</p>
+        <p>Please pick your interests to get suggestions</p>
         <p>(You can add/remove interests anytime in your account settings)</p>
         
         <div class="category">
@@ -190,32 +190,40 @@
             </div>
         </div>
 
+        <!-- We can add more categories and options in the future if needed -->
+
         <div class="button-container">
-            <button class="next-btn" id="next-btn">Next</button>
+            <button class="next-btn" id="nextButton">Next</button>
         </div>
     </div>
 
     <script>
-        const interestsContainer = document.getElementById('interests-container');
-        const nextBtn = document.getElementById('next-btn');
-        const options = document.querySelectorAll('.option:not(.unclickable)');
+        document.addEventListener('DOMContentLoaded', function() {
+            const options = document.querySelectorAll('.option');
+            const nextButton = document.getElementById('nextButton');
 
-        interestsContainer.addEventListener('scroll', function() {
-            const scrollPosition = interestsContainer.scrollTop + interestsContainer.clientHeight;
-            const scrollHeight = interestsContainer.scrollHeight;
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                    updateNextButtonState();
+                });
+            });
 
-            if (scrollPosition >= scrollHeight - 10) {
-                nextBtn.classList.add('active');
-                nextBtn.disabled = false;
-            } else {
-                nextBtn.classList.remove('active');
-                nextBtn.disabled = true;
+            function updateNextButtonState() {
+                const selectedOptions = document.querySelectorAll('.option.selected');
+                if (selectedOptions.length > 0) {
+                    nextButton.classList.add('active');
+                    nextButton.disabled = false;
+                } else {
+                    nextButton.classList.remove('active');
+                    nextButton.disabled = true;
+                }
             }
-        });
 
-        options.forEach(option => {
-            option.addEventListener('click', function() {
-                this.classList.toggle('selected');
+            nextButton.addEventListener('click', function() {
+                if (this.classList.contains('active')) {
+                    window.location.href = 'AskLocation.html';
+                }
             });
         });
     </script>
