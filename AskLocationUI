@@ -86,15 +86,20 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .error-message {
+            color: red;
+            display: none;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="location-container">
         <div class="options-container">
-            <div class="option">
+            <div class="option selected">
                 <label>
                     <input type="radio" name="location-method" value="current" checked>
-                    Give current location data (more precise, better suggestions)
+                    Give current location data
                 </label>
             </div>
             <div class="option">
@@ -110,6 +115,8 @@
         <div class="button-container">
             <button class="next-btn">Next</button>
         </div>
+        <div class="error-message" id="error-message">Please select a location on the map to proceed.</div>
+        <div class="error-message" id="geo-error-message">Location Access denied. Please Pick Option 2.</div>
     </div>
 
     <script>
@@ -118,7 +125,7 @@
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 35.4786, lng: 33.8964 }, // Default to AUB, Beirut, Lebanon
+                center: { lat: 33.8964, lng: 35.4786 }, // Default to AUB, Beirut, Lebanon
                 zoom: 8
             });
 
@@ -159,7 +166,36 @@
             });
         });
 
-        document.querySelector('.option').classList.add('selected');
+        document.querySelector('.next-btn').addEventListener('click', function() {
+            const selectedMethod = document.querySelector('input[name="location-method"]:checked').value;
+            const errorMessage = document.getElementById('error-message');
+            const geoErrorMessage = document.getElementById('geo-error-message');
+
+            if (selectedMethod === 'current') {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            document.getElementById('latitude').value = position.coords.latitude;
+                            document.getElementById('longitude').value = position.coords.longitude;
+                            window.location.href = 'calendar.html'; 
+                        },
+                        function() {                                       // if option 1 is selected, make sure that
+                            geoErrorMessage.style.display = 'block';       // location access is allowed, otherwise do not proceed
+                        }
+                    );
+                } else {
+                    geoErrorMessage.style.display = 'block';
+                }
+            } else if (selectedMethod === 'manual') {
+                const latitude = document.getElementById('latitude').value;
+                const longitude = document.getElementById('longitude').value;
+                if (latitude && longitude) {
+                    window.location.href = 'calendar.html'; // if option 2 is selected, make sure
+                } else {                                    // that a marker is placed before proceeding
+                    errorMessage.style.display = 'block';
+                }
+            }
+        });
     </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoGWyz_kVrDO3qf8VgyLa5hSWF_0ncfGY&callback=initMap"></script>
