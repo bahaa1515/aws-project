@@ -126,16 +126,18 @@
 
             const form = document.querySelector('form');
             form.addEventListener('submit', function(event) {
-                if (passwordInput.value !== confirmPasswordInput.value) {
-                    alert('Passwords do not match.');
-                    event.preventDefault(); // Prevent form submission
-                }
-
                 const emailInput = document.getElementById('email');
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailInput.value)) {
+
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    alert('Passwords do not match.');
+                    event.preventDefault(); // Prevent form submission if passwords do not match
+                } else if (!emailRegex.test(emailInput.value)) {
                     alert('Please enter a valid email address.');
-                    event.preventDefault(); // Prevent form submission
+                    event.preventDefault(); // Prevent form submission if email is not valid (in terms of syntax)
+                } else {
+                    event.preventDefault(); // Prevent actual form submission
+                    window.location.href = 'Interests.html'; // Redirect to Interests page
                 }
             });
         });
