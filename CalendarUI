@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Planner</title>
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body.dark-mode .popup {
+            background-color: #333;
+            color: #fff;
+        }
+
+        body.dark-mode .header,
+        body.dark-mode .footer {
+            background-color: #222;
+        }
+
+        body.dark-mode .day-header,
+        body.dark-mode .time-slot {
+            background-color: #444;
+            color: #fff;
+        }
+
+        body.dark-mode .popup input,
+        body.dark-mode .popup select {
+            background-color: #444;
+            color: #fff;
+            border-color: #555;
+        }
+
+
+
+        body.dark-mode .day-column {
+            background-color: #333;
+            border-color: #555;
+        }
+
+        body.dark-mode .popup button {
+            background-color: #555;
+            color: #fff;
+        }
+
+        body.dark-mode .radio-option {
+            border-color: #555;
+        }
+
+        body.dark-mode .radio-option.selected {
+            background-color: #007bff;
+        }
+
+        body.dark-mode .main-content {
+            background-color: #333;
+        }
+
+        body, .header, .footer, .main-content, .day-header, .time-slot, .day-column, .popup, .popup input, .popup select, .popup button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .planner-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: 60px repeat(7, 1fr);
+            gap: 0;
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+            border-top: 1px solid #e0e0e0;
+            border-left: 1px solid #e0e0e0;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            color: #007bff;
+            padding: 10px 0;
+            border-bottom: 1px solid #ccc;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 1;
+        }
+
+        .time-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .time-slot {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        .day-column {
+            border: 1px solid #ccc;
+            position: relative;
+            background-color: white;
+            height: 60px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            background-color: white;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            margin: 0 20px;
+        }
+
+        .add-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .event {
+            position: absolute;
+            left: 0;
+            right: 0;
+            padding: 2px;
+            border-radius: 2px;
+            font-size: 10px;
+            overflow: hidden;
+            z-index: 1;
+            box-sizing: border-box;
+        }
+        
+        .event-work {
+            background-color: #009411;
+        }
+
+        .event-food {
+            background-color: #ff6b6b;
+        }
+
+        .event-sports {
+            background-color: #006ac0;
+        }
+
+        .event-entertainment {
+            background-color: #c44ec4;
+        }
+
+        .event-culture {
+            background-color: #f7b731;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            width: 350px;
+        }
+        
+        #customRadius {
+            width: 100%;
+            box-sizing: border-box;
+        } 
+
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            flex: 1;
+        }
+
+        .radio-option.selected {
+            background-color: #e6f2ff;
+            border-color: #007bff;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .event:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .category-button {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            background-size: cover;
+            background-position: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="planner-container">
+        <div class="header">
+            <div class="title">Calendar View</div>
+            <div class="controls">
+                <div class="control-btn" onclick="showSettings()">⚙️</div>
+                <div class="control-btn" onclick="showProfile()">👤</div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="calendar" id="calendar">
+                <!-- Calendar content will be dynamically generated here -->
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer-btn" onclick="window.location.href='calendar.html'">🏠 Home</div>
+            <button class="add-btn" onclick="showPopup()">+</button>
+            <div class="footer-btn">🔥 Trending</div>
+        </div>
+    </div>
+
+    <div id="addEventPopup" class="popup">
+        <div class="popup-content">
+            <h3>New Activity</h3>
+            <div class="radio-group">
+                <label class="radio-option" onclick="selectOption('manual')">
+                    <input type="radio" name="addType" value="manual">
+                    Add manually
+                </label>
+                <label class="radio-option" onclick="selectOption('suggestion')">
+                    <input type="radio" name="addType" value="suggestion">
+                    Add a suggestion
+                </label>
+            </div>
+            <div class="popup-buttons">
+                <button onclick="closePopup()">Cancel</button>
+                <button onclick="nextStep()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addManuallyPopup" class="popup">
+        <div class="popup-content">
+            <h3>New Activity</h3>
+            <label for="activityType">Type:</label>
+            <select id="activityType">
+                <option value="work">Work/Study</option>
+                <option value="food">Food</option>
+                <option value="sports">Sports and Fitness</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="culture">Culture and Creativity</option>
+            </select>
+            <label for="activityTitle">Title:</label>
+            <input type="text" id="activityTitle" required>
+            <label for="activityStartTime">Start Time:</label>
+            <input type="time" id="activityStartTime" step="900" required>
+            <label for="activityEndTime">End Time:</label>
+            <input type="time" id="activityEndTime" step="900" required>
+            <label>Day/s:</label>
+            <div class="day-selectors">
+                <label><input type="checkbox" value="monday"> Mon</label>
+                <label><input type="checkbox" value="tuesday"> Tue</label>
+                <label><input type="checkbox" value="wednesday"> Wed</label>
+                <label><input type="checkbox" value="thursday"> Thu</label>
+                <label><input type="checkbox" value="friday"> Fri</label>
+                <label><input type="checkbox" value="saturday"> Sat</label>
+                <label><input type="checkbox" value="sunday"> Sun</label>
+            </div>
+            <div class="popup-buttons">
+                <button onclick="closePopup()">Cancel</button>
+                <button onclick="addEvent()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const calendarElement = document.getElementById('calendar');
+    
+        function generateCalendar() {
+            const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const startTime = 0; 
+            const endTime = 24; 
+            const timeSlotHeight = 60;
+    
+            // Add day headers
+            for (let i = 0; i < daysOfWeek.length + 1; i++) {
+                const header = document.createElement('div');
+                header.classList.add('day-header');
+                if (i === 0) {
+                    header.textContent = ''; // Empty space for time column
+                } else {
+                    header.textContent = daysOfWeek[i - 1];
+                }
+                calendarElement.appendChild(header);
+            }
+    
+            // Add time slots and day columns
+            for (let hour = startTime; hour < endTime; hour++) {
+                const timeSlot = document.createElement('div');
+                timeSlot.classList.add('time-slot');
+                timeSlot.textContent = `${hour.toString().padStart(2, '0')}:00 - ${(hour + 1).toString().padStart(2, '0')}:00`;
+                calendarElement.appendChild(timeSlot);
+
+    
+                for (let day = 0; day < 7; day++) {
+                    const dayColumn = document.createElement('div');
+                    dayColumn.classList.add('day-column');
+                    
+                    calendarElement.appendChild(dayColumn);
+                }
+            }
+        }
+    
+        generateCalendar();
+    
+        function showPopup() {
+            document.getElementById('addEventPopup').style.display = 'block';
+        }
+    
+        function closePopup() {
+            document.getElementById('addEventPopup').style.display = 'none';
+            document.getElementById('addManuallyPopup').style.display = 'none';
+        
+            const dynamicPopups = ['suggestionsPopup', 'profilePopup', 'settingsPopup', 'foodSuggestionsPopup'];
+            dynamicPopups.forEach(popupId => {
+                const popup = document.getElementById(popupId);
+                if (popup) {
+                    popup.remove();
+                }
+            });       
+        }
+    
+        function selectOption(option) {
+            const radioOptions = document.querySelectorAll('.radio-option');
+            radioOptions.forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[value="${option}"]`).parentElement.classList.add('selected');
+        }
+
+        function showSuggestions() {
+            const suggestionsPopup = document.createElement('div');
+            suggestionsPopup.id = 'suggestionsPopup';
+            suggestionsPopup.classList.add('popup');
+            suggestionsPopup.innerHTML = `
+                <div class="popup-content">
+                    <h3>Suggestions</h3>
+                    <div class="category-buttons">
+                        <div class="category-button" style="background-color: #ff6b6b;" onclick="showFoodSuggestions()">Food</div>
+                        <div class="category-button" style="background-color: #006ac0;" onclick="showComingSoon('Sports and Fitness')">Sports and Fitness</div>
+                        <div class="category-button" style="background-color: #c44ec4;" onclick="showComingSoon('Entertainment')">Entertainment</div>
+                        <div class="category-button" style="background-color: #f7b731;" onclick="showComingSoon('Culture and Creativity')">Culture and Creativity</div>
+                    </div>
+                    <button onclick="closePopup()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(suggestionsPopup);
+            suggestionsPopup.style.display = 'block';
+        }
+
+        function showComingSoon(category) {
+            alert(`${category} suggestions coming soon...`);
+        }
+
+        function showProfile() {
+            closePopup();
+            const profilePopup = document.createElement('div');
+            profilePopup.id = 'profilePopup';
+            profilePopup.classList.add('popup');
+            profilePopup.innerHTML = `
+                <div class="popup-content">
+                    <h3>Profile</h3>
+                    <button onclick="viewProfile()">View Profile</button>
+                    <button onclick="closePopup()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(profilePopup);
+            profilePopup.style.display = 'block';
+        }
+
+        function viewProfile() {
+        // Implement view profile functionality later (href=profile.html)
+        alert('View Profile functionality coming soon...');
+        }
+
+        function showSettings() {
+            closePopup();
+            const settingsPopup = document.createElement('div');
+            settingsPopup.id = 'settingsPopup';
+            settingsPopup.classList.add('popup');
+            settingsPopup.innerHTML = `
+                <div class="popup-content">
+                    <h3>Settings</h3>
+                    <div class="setting-option">
+                        <label for="darkMode">Dark Mode</label>
+                        <input type="checkbox" id="darkMode" onchange="toggleDarkMode()">
+                    </div>
+                    <p>More coming soon...</p>
+                    <button onclick="closePopup()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(settingsPopup);
+            settingsPopup.style.display = 'block';
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function resetForm() {
+            document.getElementById('activityType').value = 'work';
+            document.getElementById('activityTitle').value = '';
+            document.getElementById('activityStartTime').value = '';
+            document.getElementById('activityEndTime').value = '';
+            document.querySelectorAll('.day-selectors input').forEach(input => input.checked = false);
+        }
+    
+        function nextStep() {
+            const selectedOption = document.querySelector('.radio-option.selected input').value;
+            closePopup();
+            if (selectedOption === 'manual') {
+                resetForm();
+                document.getElementById('addManuallyPopup').style.display = 'block';
+            } else {
+                showSuggestions();
+            }
+        }
+    
+        function deleteEvent(button) {
+            button.parentElement.remove();
+        }
+
+        function showFoodSuggestions() {
+            closePopup(); // Ensure consistent naming with other parts of your code
+            const foodPopup = document.createElement('div');
+            foodPopup.id = 'foodSuggestionsPopup';
+            foodPopup.classList.add('popup');
+            foodPopup.innerHTML = `
+                <div class="popup-content">
+                    <h3>Food Suggestions</h3>
+                    <div>
+                        <label>Type:</label>
+                        <select id="foodType">
+                            <option value="random">Random 🎲</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Distance:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="distance" value="walking">
+                                🚶 Walking Distance
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="distance" value="driving">
+                                🚗 Driving Distance
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="distance" value="custom">
+                                Custom
+                            </label>
+                        </div>
+                    </div>
+                    <div id="customRadiusInput" style="display: none;">
+                        <label for="customRadius">Custom Radius:</label>
+                        <input type="number" id="customRadius" placeholder="Set radius in meters">
+                    </div>
+                    <div class="popup-buttons">
+                        <button onclick="closePopup()">Cancel</button>
+                        <button onclick="createFoodEvent()">Create</button>
+                    </div>
+                </div>
+            `; // Ensure to close the "popup-content" div correctly
+            document.body.appendChild(foodPopup);
+            foodPopup.style.display = 'block';
+
+            // Show/hide custom radius input based on selection
+            const distanceOptions = foodPopup.querySelectorAll('input[name="distance"]');
+            distanceOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    document.getElementById('customRadiusInput').style.display = 
+                        this.value === 'custom' ? 'block' : 'none';
+                });
+            });
+        }
+
+
+        function createFoodEvent() {
+        // Implement food event creation logic here
+        closePopup();
+        }
+    
+        function addEvent() {
+            const type = document.getElementById('activityType').value;
+            const title = document.getElementById('activityTitle').value;
+            const startTime = document.getElementById('activityStartTime').value;
+            const endTime = document.getElementById('activityEndTime').value;
+            const days = Array.from(document.querySelectorAll('.day-selectors input:checked')).map(input => input.value);
+
+            if (days.length == 0) {
+                alert('Please select at least one day.');
+                return;
+            }
+
+            if (startTime >= endTime) {
+                alert('Start time must be before end time.');
+                return;
+            }
+
+            days.forEach(day => {
+                const dayIndex = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(day);
+                const dayColumn = document.querySelectorAll('.day-column')[dayIndex + 7]; // +7 to skip the first row
+                const existingEvents = dayColumn.querySelectorAll('.event');
+
+                let overlap = false;
+
+                existingEvents.forEach(event => {
+                    const eventStart = event.style.top.replace('px', '') / 60;
+                    const eventEnd = eventStart + event.style.height.replace('px', '') / 60;
+                    const newStart = parseInt(startTime.split(':')[0]) + parseInt(startTime.split(':')[1]) / 60;
+                    const newEnd = parseInt(endTime.split(':')[0]) + parseInt(endTime.split(':')[1]) / 60;
+
+                    if ((newStart < eventEnd && newEnd > eventStart) || (eventStart < newEnd && eventEnd > newStart)) {
+                        overlap = true;
+                        alert(`Activity "${title}" is overlapping with activity "${event.querySelector('div').textContent}"`);
+                    }
+                });
+
+                if (!overlap) {
+                    const event = document.createElement('div');
+                    event.classList.add('event', `event-${type}`);
+                    event.innerHTML = `
+                        <div>${title}</div>
+                        <div>${startTime} - ${endTime}</div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    `;
+
+                    const startHour = parseInt(startTime.split(':')[0]);
+                    const startMinute = parseInt(startTime.split(':')[1]);
+                    const endHour = parseInt(endTime.split(':')[0]);
+                    const endMinute = parseInt(endTime.split(':')[1]);
+
+                    const startPosition = (startHour * 60 + startMinute) - 60;
+                    const endPosition = (endHour * 60 + endMinute) - 60;
+                    const duration = endPosition - startPosition
+
+                    event.style.top = `${startPosition}px`;
+                    event.style.height = `${duration}px`;
+
+                    dayColumn.appendChild(event);
+                }
+            });
+
+            closePopup();
+        }
+    </script>
+    
+</body>
+</html>
