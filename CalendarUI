@@ -541,13 +541,25 @@
         }
 
         function showFoodSuggestions() {
-            closePopup(); // Ensure consistent naming with other parts of your code
+            closePopup();
             const foodPopup = document.createElement('div');
             foodPopup.id = 'foodSuggestionsPopup';
             foodPopup.classList.add('popup');
             foodPopup.innerHTML = `
                 <div class="popup-content">
                     <h3>Food Suggestions</h3>
+                    <div>
+                        <label for="foodDay">Day:</label>
+                        <select id="foodDay" required>
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday">Friday</option>
+                            <option value="saturday">Saturday</option>
+                            <option value="sunday">Sunday</option>
+                        </select>
+                    </div>
                     <div>
                         <label>Type:</label>
                         <select id="foodType">
@@ -575,12 +587,27 @@
                         <label for="customRadius">Custom Radius:</label>
                         <input type="number" id="customRadius" placeholder="Set radius in meters">
                     </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="specifyTime" onchange="toggleTimeFields()"> Specify time
+                        </label>
+                    </div>
+                    <div id="timeFields" style="display: none;">
+                        <div>
+                            <label for="foodStartTime">Start Time (of free time slot):</label>
+                            <input type="time" id="foodStartTime">
+                        </div>
+                        <div>
+                            <label for="foodEndTime">End Time (of free time slot):</label>
+                            <input type="time" id="foodEndTime">
+                        </div>
+                    </div>
                     <div class="popup-buttons">
                         <button onclick="closePopup()">Cancel</button>
                         <button onclick="createFoodEvent()">Create</button>
                     </div>
                 </div>
-            `; // Ensure to close the "popup-content" div correctly
+            `;
             document.body.appendChild(foodPopup);
             foodPopup.style.display = 'block';
 
@@ -594,10 +621,102 @@
             });
         }
 
+        function toggleTimeFields() {
+            const timeFields = document.getElementById('timeFields');
+            const specifyTime = document.getElementById('specifyTime');
+            timeFields.style.display = specifyTime.checked ? 'block' : 'none';
+        }
+
 
         function createFoodEvent() {
-        // Implement food event creation logic here
-        closePopup();
+            const foodDay = document.getElementById('foodDay').value;
+            const foodType = document.getElementById('foodType').value;
+            const distanceType = document.querySelector('input[name="distance"]:checked').value;
+            const customRadius = document.getElementById('customRadius').value;
+            const specifyTime = document.getElementById('specifyTime').checked;
+            let startTime = document.getElementById('foodStartTime').value;
+            let endTime = document.getElementById('foodEndTime').value;
+
+            if (!specifyTime) {
+                // Find the largest chunk of free time
+                const freeTimeSlot = findLargestFreeTimeSlot(foodDay);
+                startTime = freeTimeSlot.start;
+                endTime = freeTimeSlot.end;
+            }
+
+            // Here you would typically send this data to your backend or process it further
+            console.log({
+                foodDay,
+                foodType,
+                distanceType,
+                customRadius: distanceType === 'custom' ? customRadius : null,
+                startTime,
+                endTime
+            });
+
+            // For now, let's just close the popup and add the event
+            closePopup();
+            addFoodEventToCalendar(foodDay, startTime, endTime, foodType);
+        }
+
+        function findLargestFreeTimeSlot(day) {
+            const dayIndex = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(day);
+            const dayColumn = document.querySelectorAll('.day-column')[dayIndex + 7]; // +7 to skip the first row
+            const events = Array.from(dayColumn.querySelectorAll('.event'));
+
+            // Sort events by start time
+            events.sort((a, b) => parseInt(a.style.top) - parseInt(b.style.top));
+
+            let largestGap = { start: '00:00', end: '00:00', duration: 0 };
+            let lastEndTime = 0;
+
+            for (let i = 0; i <= events.length; i++) {
+                let startTime = i < events.length ? parseInt(events[i].style.top) : 24 * 60;
+                if (startTime - lastEndTime > largestGap.duration) {
+                    largestGap = {
+                        start: minutesToTime(lastEndTime),
+                        end: minutesToTime(startTime),
+                        duration: startTime - lastEndTime
+                    };
+                }
+                if (i < events.length) {
+                    lastEndTime = parseInt(events[i].style.top) + parseInt(events[i].style.height);
+                }
+            }
+
+            return largestGap;
+        }
+
+        function minutesToTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        }
+
+        function addFoodEventToCalendar(day, startTime, endTime, foodType) {
+            const dayIndex = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(day);
+            const dayColumn = document.querySelectorAll('.day-column')[dayIndex + 7]; // +7 to skip the first row
+
+            const event = document.createElement('div');
+            event.classList.add('event', 'event-food');
+            event.innerHTML = `
+                <div>Food: ${foodType}</div>
+                <div>${startTime} - ${endTime}</div>
+                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+            `;
+
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
+
+            event.style.top = `${startMinutes}px`;
+            event.style.height = `${endMinutes - startMinutes}px`;
+
+            dayColumn.appendChild(event);
+        }
+
+        function timeToMinutes(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            return hours * 60 + minutes;
         }
     
         function addEvent() {
