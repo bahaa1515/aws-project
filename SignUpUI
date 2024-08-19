@@ -47,7 +47,7 @@
             color: #333;
             margin-bottom: 20px;
         }
-        input[type="text"], input[type="email"], input[type="password"], input[type="date"] {
+        input[type="text"], input[type="email"], input[type="password"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -78,6 +78,11 @@
         .mismatch {
             color: red;
         }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -93,7 +98,8 @@
                 <input type="password" id="confirmPassword" class="password-input" placeholder="Confirm Password" required>
             </div>
             <div class="password-message" id="passwordMessage"></div>
-            <input type="date" placeholder="Date of Birth" required>
+            <input type="text" id="age" placeholder="Age" required>
+            <div class="error-message" id="ageError"></div>
             <button type="submit" class="signup-btn">Sign Up</button>
         </form>
     </div>
@@ -103,6 +109,8 @@
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
             const passwordMessage = document.getElementById('passwordMessage');
+            const ageInput = document.getElementById('age');
+            const ageError = document.getElementById('ageError');
 
             function checkPasswordMatch() {
                 if (confirmPasswordInput.value === "") {
@@ -124,6 +132,19 @@
             passwordInput.addEventListener('input', checkPasswordMatch);
             confirmPasswordInput.addEventListener('input', checkPasswordMatch);
 
+            function validateAge() {
+                const age = parseInt(ageInput.value);
+                if (isNaN(age) || age < 13) {
+                    ageError.textContent = "Age must be a number and at least 13.";
+                    return false;
+                } else {
+                    ageError.textContent = "";
+                    return true;
+                }
+            }
+
+            ageInput.addEventListener('input', validateAge);
+
             const form = document.querySelector('form');
             form.addEventListener('submit', function(event) {
                 const emailInput = document.getElementById('email');
@@ -131,13 +152,16 @@
 
                 if (passwordInput.value !== confirmPasswordInput.value) {
                     alert('Passwords do not match.');
-                    event.preventDefault(); // Prevent form submission if passwords do not match
+                    event.preventDefault();
                 } else if (!emailRegex.test(emailInput.value)) {
                     alert('Please enter a valid email address.');
-                    event.preventDefault(); // Prevent form submission if email is not valid (in terms of syntax)
+                    event.preventDefault();
+                } else if (!validateAge()) {
+                    alert('Please enter a valid age (13 or older).');
+                    event.preventDefault();
                 } else {
-                    event.preventDefault(); // Prevent actual form submission
-                    window.location.href = 'Interests.html'; // Redirect to Interests page
+                    event.preventDefault();
+                    window.location.href = 'Interests.html';
                 }
             });
         });
