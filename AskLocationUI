@@ -166,6 +166,31 @@
             });
         });
 
+        function sendLocationToAPI(latitude, longitude) {
+            const apiUrl = 'YOUR_AWS_API_GATEWAY_URL_HERE'; // Replace with your actual API Gateway URL
+            const data = {
+                latitude: latitude,
+                longitude: longitude
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                window.location.href = 'calendar.html'; // Redirect after successful API call
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Handle error (e.g., show an error message to the user)
+            });
+        }
+
         document.querySelector('.next-btn').addEventListener('click', function() {
             const selectedMethod = document.querySelector('input[name="location-method"]:checked').value;
             const errorMessage = document.getElementById('error-message');
@@ -175,12 +200,12 @@
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
-                            document.getElementById('latitude').value = position.coords.latitude;
-                            document.getElementById('longitude').value = position.coords.longitude;
-                            window.location.href = 'calendar.html'; 
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+                            sendLocationToAPI(latitude, longitude);
                         },
-                        function() {                                       // if option 1 is selected, make sure that
-                            geoErrorMessage.style.display = 'block';       // location access is allowed, otherwise do not proceed
+                        function() {
+                            geoErrorMessage.style.display = 'block';
                         }
                     );
                 } else {
@@ -190,13 +215,17 @@
                 const latitude = document.getElementById('latitude').value;
                 const longitude = document.getElementById('longitude').value;
                 if (latitude && longitude) {
-                    window.location.href = 'calendar.html'; // if option 2 is selected, make sure
-                } else {                                    // that a marker is placed before proceeding
+                    sendLocationToAPI(latitude, longitude);
+                } else {
                     errorMessage.style.display = 'block';
                 }
             }
         });
     </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoGWyz_kVrDO3qf8VgyLa5hSWF_0ncfGY&callback=initMap"></script>
+</body>
+</html>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoGWyz_kVrDO3qf8VgyLa5hSWF_0ncfGY&callback=initMap"></script>
 </body>
