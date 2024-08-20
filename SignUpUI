@@ -88,8 +88,8 @@
 <body>
     <div class="signup-container">
         <h1>Sign Up</h1>
-        <form>
-            <input type="text" placeholder="Username" required>
+        <form id="signupForm">
+            <input type="text" id="username" placeholder="Username" required>
             <input type="email" id="email" placeholder="Email" required>
             <div class="password-container">
                 <input type="password" id="password" class="password-input" placeholder="Password" required>
@@ -145,23 +145,47 @@
 
             ageInput.addEventListener('input', validateAge);
 
-            const form = document.querySelector('form');
+            const form = document.getElementById('signupForm');
             form.addEventListener('submit', function(event) {
-                const emailInput = document.getElementById('email');
+                event.preventDefault();
+
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = passwordInput.value;
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-                if (passwordInput.value !== confirmPasswordInput.value) {
+                if (password !== confirmPasswordInput.value) {
                     alert('Passwords do not match.');
-                    event.preventDefault();
-                } else if (!emailRegex.test(emailInput.value)) {
+                } else if (!emailRegex.test(email)) {
                     alert('Please enter a valid email address.');
-                    event.preventDefault();
                 } else if (!validateAge()) {
                     alert('Please enter a valid age (13 or older).');
-                    event.preventDefault();
                 } else {
-                    event.preventDefault();
-                    window.location.href = 'Interests.html';
+                    // Send data to API Gateway
+                    const apiUrl = 'YOUR_API_GATEWAY_URL_HERE'; // Replace with your actual API Gateway URL
+                    const userData = {
+                        username: username,
+                        email: email,
+                        password: password
+                    };
+
+                    fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        // Redirect to the Interests page
+                        window.location.href = 'Interests.html';
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('An error occurred during sign up. Please try again.');
+                    });
                 }
             });
         });
