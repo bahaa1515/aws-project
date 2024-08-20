@@ -118,7 +118,7 @@
         <p>Please pick your interests to get suggestions</p>
         <p>(You can add/remove interests anytime in your account settings)</p>
         
-        <div class="category">
+        <div class="category" id="food">
             <div class="category-title">Food</div>
             <div class="options">
                 <span class="option">Lebanese 🇱🇧</span>
@@ -132,7 +132,7 @@
             </div>
         </div>
 
-        <div class="category">
+        <div class="category" id="scenery">
             <div class="category-title">Scenery</div>
             <div class="options">
                 <span class="option">Sunsets 🌅</span>
@@ -146,7 +146,7 @@
             </div>
         </div>
 
-        <div class="category">
+        <div class="category" id="sports">
             <div class="category-title">Sports and Fitness</div>
             <div class="options">
                 <span class="option">Football ⚽️</span>
@@ -162,7 +162,7 @@
             </div>
         </div>
 
-        <div class="category">
+        <div class="category" id="entertainment">
             <div class="category-title">Entertainment</div>
             <div class="options">
                 <span class="option">Board Games ♟️</span>
@@ -179,7 +179,7 @@
             </div>
         </div>
 
-        <div class="category">
+        <div class="category" id="culture">
             <div class="category-title">Culture and Creativity</div>
             <div class="options">
                 <span class="option">Museum 🗿</span>
@@ -189,8 +189,6 @@
                 <span class="option unclickable">More coming soon...</span>
             </div>
         </div>
-
-        <!-- We can add more categories and options in the future if needed -->
 
         <div class="button-container">
             <button class="next-btn" id="nextButton">Next</button>
@@ -204,8 +202,10 @@
 
             options.forEach(option => {
                 option.addEventListener('click', function() {
-                    this.classList.toggle('selected');
-                    updateNextButtonState();
+                    if (!this.classList.contains('unclickable')) {
+                        this.classList.toggle('selected');
+                        updateNextButtonState();
+                    }
                 });
             });
 
@@ -220,11 +220,51 @@
                 }
             }
 
+            function getSelectedInterests() {
+                const interests = {};
+                const categories = document.querySelectorAll('.category');
+                
+                categories.forEach(category => {
+                    const categoryName = category.querySelector('.category-title').textContent;
+                    const selectedOptions = category.querySelectorAll('.option.selected');
+                    
+                    if (selectedOptions.length > 0) {
+                        interests[categoryName] = Array.from(selectedOptions).map(option => option.textContent.trim());
+                    }
+                });
+
+                return interests;
+            }
+
             nextButton.addEventListener('click', function() {
                 if (this.classList.contains('active')) {
-                    window.location.href = 'AskLocation.html';
+                    const selectedInterests = getSelectedInterests();
+                    sendInterestsToAPIGateway(selectedInterests);
                 }
             });
+
+            function sendInterestsToAPIGateway(interests) {
+                // Replace with your actual API Gateway endpoint
+                const apiGatewayEndpoint = 'https://your-api-gateway-endpoint.amazonaws.com/stage/path';
+
+                fetch(apiGatewayEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(interests),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // Redirect to the next page after successful submission
+                    window.location.href = 'AskLocation.html';
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    // Handle error (e.g., show an error message to the user)
+                });
+            }
         });
     </script>
 </body>
