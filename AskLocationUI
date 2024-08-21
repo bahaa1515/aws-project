@@ -167,7 +167,7 @@
         });
 
         function sendLocationToAPI(latitude, longitude) {
-            const apiUrl = 'YOUR_AWS_API_GATEWAY_URL_HERE'; // Replace with your actual API Gateway URL
+            const apiUrl = 'https://uuk335nf06.execute-api.us-east-2.amazonaws.com/location-test1'; // Replace with your actual API Gateway URL
             const data = {
                 latitude: latitude,
                 longitude: longitude
@@ -222,10 +222,6 @@
             }
         });
     </script>
-
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoGWyz_kVrDO3qf8VgyLa5hSWF_0ncfGY&callback=initMap"></script>
-</body>
-</html>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoGWyz_kVrDO3qf8VgyLa5hSWF_0ncfGY&callback=initMap"></script>
 </body>
