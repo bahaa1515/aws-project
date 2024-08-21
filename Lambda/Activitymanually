@@ -1,0 +1,106 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+table = dynamodb.Table('Users_Data')
+
+def lambda_handler(event, context):
+    try:
+        # Log the incoming event
+        logger.info(f"Received event: {json.dumps(event)}")
+        
+        # Check if 'body' is a string; if not, assume it's already a dict
+        if isinstance(event['body'], str):
+            data = json.loads(event['body'])
+        else:
+            data = event['body']
+        
+        # Extract User_ID and Email (SortKey)
+        User_ID = data.get('User_ID')
+        sort_key_value = data.get('SortKey')
+        days = data.get('days')
+        
+        # Validate the input
+        if not User_ID or not sort_key_value or not days:
+            raise ValueError("Missing required fields")
+        
+        # Convert User_ID to an integer if it's a string
+        try:
+            User_ID = int(User_ID)
+        except ValueError:
+            raise ValueError("User_ID must be a valid integer")
+        
+        # Ensure sort_key_value (Email) is passed as a string
+        if not isinstance(sort_key_value, str):
+            raise ValueError("SortKey (Email) must be a string")
+        
+        # Check if the item with User_ID and Email exists in the table
+        response = table.get_item(Key={'User_ID': User_ID, 'Email': sort_key_value})
+        if 'Item' not in response:
+            raise ValueError("User ID and Email combination does not exist")
+        
+        # Update the existing item with the new activities
+        existing_item = response['Item']
+        activities = existing_item.get('Activities', {})
+        
+        for day, day_activities in days.items():
+            if day not in activities:
+                activities[day] = {}
+            
+            for activity in day_activities:
+                activity_type = activity.get('activity_type')
+                activity_title = activity.get('activity_title')
+                start_time = activity.get('start_time')
+                end_time = activity.get('end_time')
+                
+                if not all([activity_type, activity_title, start_time, end_time]):
+                    raise ValueError(f"Missing required activity fields for day: {day}")
+                
+                activity_number = f"Activity {len(activities[day]) + 1}"
+                activities[day][activity_number] = {
+                    'activity_title': activity_title,
+                    'activity_type': activity_type,
+                    'start_time': start_time,
+                    'end_time': end_time
+                }
+        
+        table.update_item(
+            Key={'User_ID': User_ID, 'Email': sort_key_value},
+            UpdateExpression='SET Activities = :activities',
+            ExpressionAttributeValues={
+                ':activities': activities
+            }
+        )
+        
+        # Prepare the response
+        response_body = {
+            'message': 'Activity data stored successfully'
+        }
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response_body)
+        }
+    except ValueError as ve:
+        # Handle missing fields or 'body'
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(ve)})
+        }
+    except ClientError as e:
+        # Handle DynamoDB errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"Database error: {str(e)}"})
+        }
+    except Exception as e:
+        # Handle any other errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"An unexpected error occurred: {str(e)}"})
+        }
