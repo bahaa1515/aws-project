@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trending</title>
+    <style>
+        
+        body.dark-mode .popup {
+            background-color: #333;
+            color: #fff;
+        }
+
+        body.dark-mode .header,
+        body.dark-mode .footer {
+            background-color: #222;
+        }
+
+        body.dark-mode .popup input,
+        body.dark-mode .popup select {
+            background-color: #444;
+            color: #fff;
+            border-color: #555;
+        }
+
+        body.dark-mode .popup button {
+            background-color: #555;
+            color: #fff;
+        }
+
+        body.dark-mode .radio-option {
+            border-color: #555;
+        }
+
+        body.dark-mode .radio-option.selected {
+            background-color: #007bff;
+        }
+
+        body.dark-mode .main-content {
+            background-color: #333;
+        }
+
+        .planner-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .trending-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .trending-box {
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .trending-box .picture {
+            width: 100%;
+            height: 150px;
+            background-color: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .trending-box .details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .trending-box .add-to-calendar {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .trending-box .add-to-calendar button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .work {
+            background-color: #009411;
+        }
+
+        .food {
+            background-color: #ff6b6b;
+        }
+
+        .entertainment {
+            background-color: #c44ec4;
+        }
+
+        .sports {
+            background-color: #006ac0;
+        }
+
+        .culture {
+            background-color: #f7b731;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            background-color: white;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            margin: 0 20px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            width: 350px;
+        }
+
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="planner-container">
+        <div class="header">
+            <div class="title">Trending</div>
+            <div class="controls">
+                <div class="control-btn" onclick="showSettings()">⚙️</div>
+                <div class="control-btn" onclick="viewProfile()">👤</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="trending-container">
+                <!-- Events are manually set/curated by moderators -->
+                <div class="trending-box work">
+                    <h3> Tech Conference</h3>
+                    <div class="picture"></div>
+                    <div class="details">
+                        <div>Date: 2024-08-21</div>
+                        <div>Time: 10:00 - 12:00</div>
+                    </div>
+                    <div class="description">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </div>
+                    <div class="add-to-calendar">
+                        <button>Add to Calendar +</button>
+                    </div>
+                </div>
+                <div class="trending-box entertainment">
+                    <h3>Concert</h3>
+                    <div class="picture"></div>
+                    <div class="details">
+                        <div>Date: 2024-08-22</div>
+                        <div>Time: 14:00 - 16:00</div>
+                    </div>
+                    <div class="description">
+                        Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                    <div class="add-to-calendar">
+                        <button>Add to Calendar +</button>
+                    </div>
+                </div>
+                <div class="trending-box sports">
+                    <h3>Soccer Tournament</h3>
+                    <div class="picture"></div>
+                    <div class="details">
+                        <div>Date: 2024-08-23</div>
+                        <div>Time: 18:00 - 20:00</div>
+                    </div>
+                    <div class="description">
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+                    </div>
+                    <div class="add-to-calendar">
+                        <button>Add to Calendar +</button>
+                    </div>
+                </div>
+                <!-- We can add as many events as we want -->
+                <div class="trending-box sports">
+                    <h3>Fitness Expo</h3>
+                    <div class="picture"></div>
+                    <div class="details">
+                        <div>Date: 2024-08-24</div>
+                        <div>Time: 09:00 - 10:00</div>
+                    </div>
+                    <div class="description">
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.
+                    </div>
+                    <div class="add-to-calendar">
+                        <button>Add to Calendar +</button>
+                    </div>
+                </div>
+                <div class="trending-box culture">
+                    <h3>Museum Opening</h3>
+                    <div class="picture"></div>
+                    <div class="details">
+                        <div>Date: 2024-08-25</div>
+                        <div>Time: 15:00 - 17:00</div>
+                    </div>
+                    <div class="description">
+                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui.
+                    </div>
+                    <div class="add-to-calendar">
+                        <button>Add to Calendar +</button>
+                    </div>
+                </div>
+                <div class="trending-box food">
+                    <h3>Restaurant</h3>
+                    <div class="picture"></div>
+                    <div class="details">
+                        <div>Date: 2024-08-26</div>
+                        <div>Time: 19:00 - 21:00</div>
+                    </div>
+                    <div class="description">
+                        Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.
+                    </div>
+                    <div class="add-to-calendar">
+                        <button>Add to Calendar +</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-btn" onclick="window.location.href='calendar.html'">🏠 Home</div>
+            <div class="footer-btn" style="cursor: not-allowed;">+ </div>
+            <div class="footer-btn" onclick="window.location.href='trending.html'">🔥 Trending</div>
+        </div>
+    </div>
+
+    <script>
+        function showSettings() {
+            closePopup();
+            const settingsPopup = document.createElement('div');
+            settingsPopup.id = 'settingsPopup';
+            settingsPopup.classList.add('popup');
+            settingsPopup.innerHTML = `
+                <div class="popup-content">
+                    <h3>Settings</h3>
+                    <div class="setting-option">
+                        <label for="darkMode">Dark Mode</label>
+                        <input type="checkbox" id="darkMode" onchange="toggleDarkMode()">
+                    </div>
+                    <p>More coming soon...</p>
+                    <button onclick="closePopup()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(settingsPopup);
+            settingsPopup.style.display = 'block';
+        }
+
+        function viewProfile() {
+            // Implement view profile functionality later (href=profile.html)
+            alert('View Profile functionality coming soon...');
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('settingsPopup');
+            if (popup) {
+                popup.style.display = 'none';
+                popup.remove();
+            }
+        }
+    </script>
+</body>
+</html>
