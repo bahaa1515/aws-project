@@ -327,7 +327,7 @@
         <div class="footer">
             <div class="footer-btn" onclick="window.location.href='calendar.html'">🏠 Home</div>
             <button class="add-btn" onclick="showPopup()">+</button>
-            <div class="footer-btn">🔥 Trending</div>
+            <div class="footer-btn" onclick="window.location.href='trending.html'">🔥 Trending</div>
         </div>
     </div>
 
