@@ -1,0 +1,77 @@
+import json
+import boto3
+import uuid
+from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Attr
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+table = dynamodb.Table('Users_Data')
+
+
+
+def lambda_handler(event, context):
+    try:
+        # Parse the incoming JSON data from the event
+        data = json.loads(event['body'])
+        
+        # Extract username, age, password, and email
+        username = data.get('username')
+        Age = data.get('Age')
+        password = data.get('password')
+        Email = data.get('Email')
+        
+        # Validate that all required fields are present
+        if not all([username, Age, password, Email]):
+            raise ValueError("Missing required fields")
+        
+        response = table.scan(
+           FilterExpression=Attr('Email').eq(Email)
+        )
+
+        if response['Items']:
+            raise ValueError("Email already exists")
+        
+        # Generate a unique user ID
+        User_ID = int(uuid.uuid4().int % 1e12)
+        
+        # Store the user data in DynamoDB
+        table.put_item(Item={
+            'User_ID': User_ID,
+            'username': username,
+            'Age': Age,
+            'password': password,  # Note: In production, always hash passwords before storing
+            'Email': Email
+        })
+        
+        # Prepare the response
+        response_body = {
+            'message': 'User data stored successfully',
+            'User_ID': User_ID,
+            'username': username,
+            'Age': Age,
+            'Email': Email
+            # Note: We don't return the password
+        }
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response_body)
+        }
+    except ValueError as ve:
+        # Handle missing fields
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(ve)})
+        }
+    except ClientError as e:
+        # Handle DynamoDB errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"Database error: {str(e)}"})
+        }
+    except Exception as e:
+        # Handle any other errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"An unexpected error occurred: {str(e)}"})
+        }
