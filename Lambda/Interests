@@ -1,0 +1,74 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+table = dynamodb.Table('Users_Data')
+
+def lambda_handler(event, context):
+    try:
+        # Parse the incoming JSON data from the event
+        data = json.loads(event['body'])
+
+        # Extract User_ID, Email, and interests from the data
+        user_id = data.get('User_ID')
+        email = data.get('Email')
+        interests = data.get('Interests')
+
+        # Validate that all required fields are provided
+        if not all([user_id, email, interests]):
+            raise ValueError('Missing required fields: User_ID, Email, or Interests')
+
+        # Ensure User_ID is an integer and Email is a string
+        user_id = int(user_id)  # Convert User_ID to an integer if necessary
+        email = str(email)      # Ensure Email is a string
+
+        # Update the interests in the DynamoDB table
+        table.update_item(
+            Key={
+                'User_ID': user_id,
+                'Email': email
+            },
+            UpdateExpression='SET #interests = :interests',
+            ExpressionAttributeNames={
+                '#interests': 'Interests'
+            },
+            ExpressionAttributeValues={
+                ':interests': interests
+            }
+        )
+
+        # Prepare the success response
+        response_body = {
+            'message': 'Interests saved successfully',
+            'User_ID': user_id,
+            'Email': email,
+            'Interests': interests
+        }
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response_body)
+        }
+
+    except ValueError as ve:
+        # Handle missing or invalid fields
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(ve)})
+        }
+
+    except ClientError as e:
+        # Handle DynamoDB client errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f'Database error: {e.response["Error"]["Message"]}'})
+        }
+
+    except Exception as e:
+        # Handle any other unexpected errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f'An unexpected error occurred: {str(e)}'})
+        }
