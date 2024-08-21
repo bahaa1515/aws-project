@@ -1,0 +1,87 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key
+
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+table = dynamodb.Table('Users_Data')
+
+def decimal_to_int(value):
+    if isinstance(value, dict):
+        return {k: decimal_to_int(v) for k, v in value.items()}
+    elif isinstance(value, list):
+        return [decimal_to_int(i) for i in value]
+    elif isinstance(value, set):
+        return set(decimal_to_int(i) for i in value)
+    elif isinstance(value, float) or isinstance(value, int):
+        return value
+    elif isinstance(value, str):
+        return value
+    elif value is None:
+        return value
+    return int(value)
+
+def lambda_handler(event, context):
+    try:
+        # Parse the incoming JSON data from the event
+        data = json.loads(event['body'])
+        
+        # Extract email and password
+        Email = data.get('Email')
+        password = data.get('password')
+        
+        # Validate that both fields are present
+        if not all([Email, password]):
+            raise ValueError("Missing required fields")
+        
+        # Query the DynamoDB table to find the user with the given email
+        response = table.scan(
+            FilterExpression=Key('Email').eq(Email)
+        )
+        
+        # Check if a user with the given email exists
+        if not response['Items']:
+            raise ValueError("Email or password is incorrect")
+        
+        # Extract the user data
+        user = response['Items'][0]
+        
+        # Check if the provided password matches the stored password
+        if user['password'] != password:  # In production, compare hashed passwords
+            raise ValueError("Email or password is incorrect")
+        
+        # Convert any Decimal values to int
+        user = decimal_to_int(user)
+        
+        # Prepare the response with user details (excluding the password)
+        response_body = {
+            'message': 'Login successful',
+            'User_ID': user['User_ID'],
+            'username': user['username'],
+            'Age': user['Age'],
+            'Email': user['Email']
+        }
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response_body)
+        }
+    except ValueError as ve:
+        # Handle missing fields or invalid credentials
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(ve)})
+        }
+    except ClientError as e:
+        # Handle DynamoDB errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"Database error: {str(e)}"})
+        }
+    except Exception as e:
+        # Handle any other errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"An unexpected error occurred: {str(e)}"})
+        }
