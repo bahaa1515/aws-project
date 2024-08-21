@@ -1,0 +1,72 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+table = dynamodb.Table('Users_Data')
+
+def lambda_handler(event, context):
+    try:
+        # Parse the incoming JSON data from the event
+        data = json.loads(event['body'])
+        
+        # Extract the User_ID, Email, latitude, and longitude from the event
+        User_ID = data.get('User_ID')
+        Email = data.get('Email')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        # Validate that all required fields are present
+        if not all([User_ID, Email, latitude, longitude]):
+            raise ValueError("Missing required fields")
+        
+        # Ensure User_ID is an integer and Email is a string
+        User_ID = int(User_ID)
+        Email = str(Email)
+        
+        # Update the Location map in the DynamoDB table
+        table.update_item(
+            Key={
+                'User_ID': User_ID,  # User_ID is a number
+                'Email': Email       # Email is a string
+            },
+            UpdateExpression='SET #location = :location',
+            ExpressionAttributeNames={
+                '#location': 'Location'
+            },
+            ExpressionAttributeValues={
+                ':location': {
+                    'latitude': str(latitude),
+                    'longitude': str(longitude)
+                }
+            }
+        )
+        
+        # Prepare the response
+        response_body = {
+            'message': 'Location data updated successfully'
+        }
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response_body)
+        }
+    except ValueError as ve:
+        # Handle missing fields
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(ve)})
+        }
+    except ClientError as e:
+        # Handle DynamoDB errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"Database error: {str(e)}"})
+        }
+    except Exception as e:
+        # Handle any other errors
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': f"An unexpected error occurred: {str(e)}"})
+        }
