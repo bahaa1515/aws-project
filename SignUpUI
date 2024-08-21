@@ -152,6 +152,7 @@
                 const username = document.getElementById('username').value;
                 const email = document.getElementById('email').value;
                 const password = passwordInput.value;
+                const age = parseInt(document.getElementById('age').value);
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
                 if (password !== confirmPasswordInput.value) {
@@ -162,11 +163,13 @@
                     alert('Please enter a valid age (13 or older).');
                 } else {
                     // Send data to API Gateway
-                    const apiUrl = 'YOUR_API_GATEWAY_URL_HERE'; // Replace with your actual API Gateway URL
+                    const apiUrl = 'https://vildrm3vhb.execute-api.us-east-2.amazonaws.com/SignUpFinal-stage'; // Replace with your actual API Gateway URL
                     const userData = {
+
                         username: username,
-                        email: email,
-                        password: password
+                        Email: email,
+                        password: password,
+                        Age: age
                     };
 
                     fetch(apiUrl, {
