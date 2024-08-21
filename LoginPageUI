@@ -141,6 +141,8 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
+                    // Token or other necessary data can be stored in localStorage or sessionStorage
+                    localStorage.setItem('authToken', data.token);
                     window.location.href = 'calendar.html'; // Redirect to calendar.html
                 } else {
                     document.getElementById('error-message').style.display = 'block';
@@ -153,4 +155,5 @@
     </script>
 </body>
 </html>
+
 
